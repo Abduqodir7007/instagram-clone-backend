@@ -79,8 +79,6 @@ class GetNewCodeView(APIView):
 
 class LoginView(TokenObtainPairView):
     serializer_class = LoginViewSerializer
-    print(serializer_class)
-
 
 class ChangeUserInfoView(UpdateAPIView):
     

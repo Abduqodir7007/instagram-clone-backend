@@ -12,6 +12,7 @@ class CustomUserAdmin(UserAdmin):
                     "first_name",
                     "last_name",
                     "phone_number",
+                    "email",
                     "is_staff",
                     "is_superuser",
                     "password",
