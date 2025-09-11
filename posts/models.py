@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MaxLengthValidator
 from users.models import User
+from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Post(models.Model):
@@ -11,11 +12,11 @@ class Post(models.Model):
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
 
 
-class PostComment(models.Model):
+class PostComment(MPTTModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     comment = models.TextField(validators=[MaxLengthValidator(500)])
-    parent = models.ForeignKey(
+    parent = TreeForeignKey(
         "self", on_delete=models.CASCADE, null=True, blank=True, related_name="child"
     )
 
