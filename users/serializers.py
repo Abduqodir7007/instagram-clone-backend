@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.validators import ValidationError
+from django.contrib.auth.password_validation import validate_password
 from .models import *
 from users.utils import (
     check_email_or_phone_number,
@@ -85,8 +86,9 @@ class LoginViewSerializer(TokenObtainPairSerializer):
     password = serializers.CharField()
 
     def __init__(self, *args, **kwargs):
+        super(LoginViewSerializer, self).__init__(*args, **kwargs)
         self.fields["user_input"] = serializers.CharField(write_only=True)
-        self.fields["username"] = serializers.CharField(write_only=True)
+        self.fields["username"] = serializers.CharField(write_only=True, required=False)
 
     def auth_validate(self, data):
         user_input = data.get("user_input")
@@ -113,4 +115,38 @@ class LoginViewSerializer(TokenObtainPairSerializer):
         return user
 
     def validate(self, data):
+
         self.auth_validate(data)
+        data = self.user.token()  # type : ignore   
+        return data
+
+
+class ChangeUserInfoViewSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        password = data.get("password")
+        confirm_password = data.get("confirm_password")
+
+        if password != confirm_password:
+            data = {"msg": "Passwords should be the same"}
+            raise ValidationError(data)
+
+        if password:
+            validate_password(password)
+            validate_password(confirm_password)
+
+        return data
+
+    def update(self, instance, validated_data):
+        instance.username = validated_data.get("username", instance.username)
+        instance.first_name = validated_data.get("first_name", instance.first_name)
+        instance.last_name = validated_data.get("last_name", instance.last_name)
+        instance.set_password(validated_data.get("password", instance.password))
+        instance.save()
+
+        return instance

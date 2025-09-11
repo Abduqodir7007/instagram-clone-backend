@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, UpdateAPIView
 from .serializers import *
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.views import APIView
@@ -79,3 +79,13 @@ class GetNewCodeView(APIView):
 
 class LoginView(TokenObtainPairView):
     serializer_class = LoginViewSerializer
+    print(serializer_class)
+
+
+class ChangeUserInfoView(UpdateAPIView):
+    
+    serializer_class = ChangeUserInfoViewSerializer
+    
+    def get_object(self):
+        return self.request.user
+        

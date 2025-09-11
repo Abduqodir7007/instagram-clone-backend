@@ -22,15 +22,15 @@ def check_email_or_phone_number(email_phone_number):
 
 def check_user_input(user_input):
     if re.fullmatch(email_regex, user_input):
-        user_input = "email"
+        user_input_type = "email"
     elif re.fullmatch(phone_regex, user_input):
-        user_input = "phone_number"
+        user_input_type = "phone_number"
     elif re.fullmatch(username_regex, user_input):
-        user_input = "username"
+        user_input_type = "username"
     else:
-        raise ValidationError({"msg": "Invalid email or phone number"})
+        raise ValidationError({"    msg": "Invalid email or phone number"})
 
-    return user_input
+    return user_input_type
 
 
 def send_code_to_email(email, code):

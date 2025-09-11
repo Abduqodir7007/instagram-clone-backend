@@ -53,7 +53,7 @@ class User(AbstractUser, BaseModel):
     def create_code(self, auth_type):
         code = "".join([str(random.randint(0, 100) % 10) for _ in range(5)])
         UserConfirmation.objects.create(
-            code=code, user_id=self.id, verify_type=auth_type
+            code=code, user_id=self.id, verify_type =auth_type
         )
         return code
 
