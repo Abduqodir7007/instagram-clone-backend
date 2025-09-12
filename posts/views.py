@@ -1,12 +1,12 @@
-from django.shortcuts import render
+from .models import *
+from posts.permissions import IsOwner
+from posts.custom_pagination import CustomPagination
+from .serializers import *
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from .serializers import *
-from .models import *
-from posts.custom_pagination import CustomPagination
 
 
 class PostCreateView(CreateAPIView):
@@ -25,7 +25,7 @@ class PostListView(ListAPIView):
 
 
 class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
-    permission_classes = []
+    permission_classes = [IsOwner]
     serializer_class = PostSerilalizer
     queryset = Post.objects.all()
     lookup_field = "pk"
