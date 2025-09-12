@@ -2,9 +2,9 @@ from django.db import models
 from django.core.validators import MaxLengthValidator
 from users.models import User
 from mptt.models import MPTTModel, TreeForeignKey
+from users.models import BaseModel
 
-
-class Post(models.Model):
+class Post(BaseModel):
     author = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="posts"
     )
@@ -18,7 +18,7 @@ class Post(models.Model):
         ordering = ["-id"]
 
 
-class PostComment(MPTTModel):
+class PostComment(MPTTModel, BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     comment = models.TextField(validators=[MaxLengthValidator(500)])
@@ -27,12 +27,12 @@ class PostComment(MPTTModel):
     )
 
 
-class PostLike(models.Model):
+class PostLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
 
 
-class CommentLike(models.Model):
+class CommentLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(
         PostComment, on_delete=models.CASCADE, related_name="likes"

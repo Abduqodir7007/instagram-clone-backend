@@ -2,11 +2,20 @@ from rest_framework import serializers
 from .models import Post
 
 
-class PostSerilalizer(serializers.Serializer):
-    caption = serializers.CharField()
-    image = serializers.ImageField()
+class UserSerializer(serializers.Serializer):
+    id = serializers.UUIDField(read_only=True)
+    username = serializers.CharField()
+    image = serializers.ImageField(read_only=True)
+
+
+class PostSerilalizer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField("count_likes")
     post_comments = serializers.SerializerMethodField("count_post_comments")
+    author = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = ["id", "caption", "image", "author", "likes", "post_comments"]
 
     def create(self, validated_data):
         return Post.objects.create(**validated_data)

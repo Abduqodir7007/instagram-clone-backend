@@ -13,9 +13,7 @@ NEW, CODE_VEREFIED, DONE, PHOTO = "new", "code_verefied", "done", "photo"
 
 
 class BaseModel(models.Model):
-    id = models.UUIDField(
-        unique=True, default=uuid.uuid4(), editable=False, primary_key=True
-    )
+    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -53,7 +51,7 @@ class User(AbstractUser, BaseModel):
     def create_code(self, auth_type):
         code = "".join([str(random.randint(0, 100) % 10) for _ in range(5)])
         UserConfirmation.objects.create(
-            code=code, user_id=self.id, verify_type =auth_type
+            code=code, user_id=self.id, verify_type=auth_type
         )
         return code
 
