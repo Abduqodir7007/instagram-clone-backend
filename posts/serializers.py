@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Post
-
+from .models import *
 
 class UserSerializer(serializers.Serializer):
     id = serializers.UUIDField(read_only=True)
@@ -25,3 +24,10 @@ class PostSerilalizer(serializers.ModelSerializer):
 
     def count_post_comments(self, obj):
         return obj.comments.count()
+    
+class PostCommentViewSerializer(serializers.Serializer):
+    comment = serializers.CharField()
+
+    
+    def create(self, validated_data):
+        return PostComment.objects.create(**validated_data)
