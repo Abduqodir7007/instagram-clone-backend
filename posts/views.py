@@ -4,6 +4,7 @@ from posts.custom_pagination import CustomPagination
 from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.db.utils import IntegrityError
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
@@ -32,7 +33,7 @@ class PostRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     lookup_field = "pk"
 
 
-class PostCommentView(APIView):
+class PostCommentCreateView(APIView):
 
     def post(self, request, pk):
         user = request.user
@@ -51,3 +52,26 @@ class PostCommentView(APIView):
     #     print(self.request)
     #     post = Post.objects.get(id=self.request)
     #     serializer.save(author=self.request.user, post=post)
+
+
+class PostCommentList(ListAPIView):
+    queryset = PostComment.objects.all()
+    serializer_class = PostCommentListSerializer
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        post = Post.objects.get(id=pk)
+        return PostComment.objects.filter(post=post)
+
+
+class PostLikeView(APIView):
+
+    def post(self, request, pk):
+        try:
+
+            user = request.user
+            post = Post.objects.get(id=pk)
+            PostLike.objects.create(author=user, post=post)
+            return Response({"success": "True"})
+        except IntegrityError:
+            return Response({"msg": "You already liked this post"})

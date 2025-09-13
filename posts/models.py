@@ -3,6 +3,8 @@ from django.core.validators import MaxLengthValidator
 from users.models import User
 from mptt.models import MPTTModel, TreeForeignKey
 from users.models import BaseModel
+from django.db.models import UniqueConstraint
+
 
 class Post(BaseModel):
     author = models.ForeignKey(
@@ -31,9 +33,19 @@ class PostLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="likes")
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["author", "post"], name="postLikeUnique")
+        ]
+
 
 class CommentLike(BaseModel):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.ForeignKey(
         PostComment, on_delete=models.CASCADE, related_name="likes"
     )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=["author", "comment"], name="CommentLikeUnique")
+        ]
