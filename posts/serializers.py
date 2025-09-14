@@ -11,7 +11,7 @@ class UserSerializer(serializers.Serializer):
 class PostSerilalizer(serializers.ModelSerializer):
     likes = serializers.SerializerMethodField("count_likes")
     post_comments = serializers.SerializerMethodField("count_post_comments")
-    me_liked = serializers.SerializerMethodField("me_liked")
+    liked = serializers.SerializerMethodField("me_liked")
     author = UserSerializer(read_only=True)
 
     class Meta:
@@ -23,7 +23,7 @@ class PostSerilalizer(serializers.ModelSerializer):
             "author",
             "likes",
             "post_comments",
-            "me_liked",
+            "liked",
         ]
 
     def create(self, validated_data):
@@ -35,7 +35,7 @@ class PostSerilalizer(serializers.ModelSerializer):
     def count_post_comments(self, obj):
         return obj.comments.count()
 
-    def me_likes(self, obj):
+    def me_liked(self, obj):
         request = self.context.get("request", None)
         if request and request.user.is_authenticated:
             try:

@@ -68,10 +68,20 @@ class PostLikeView(APIView):
 
     def post(self, request, pk):
         try:
-
             user = request.user
             post = Post.objects.get(id=pk)
             PostLike.objects.create(author=user, post=post)
             return Response({"success": "True"})
+        except Post.DoesNotExist:
+            return Response({"msg": "Post not found"})
         except IntegrityError:
             return Response({"msg": "You already liked this post"})
+
+    def delete(self, request, pk):
+        try:
+            user = request.user
+            post = Post.objects.get(id=pk)
+            PostLike.objects.get(author=user, post=post).delete()
+            return Response({"succee": True})
+        except Post.DoesNotExist:
+            return Response({"msg": "error"})
