@@ -5,10 +5,12 @@ from .serializers import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.utils import IntegrityError
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
+    ListCreateAPIView
 )
 
 
@@ -38,7 +40,7 @@ class PostCommentCreateView(APIView):
     def post(self, request, pk):
         user = request.user
         post = Post.objects.get(id=pk)
-        serializer = PostCommentViewSerializer(data=request.data)
+        serializer = PostCommentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         PostComment.objects.create(
             author=user, post=post, comment=serializer.validated_data.get("comment")
@@ -64,7 +66,7 @@ class PostCommentList(ListAPIView):
         return PostComment.objects.filter(post=post)
 
 
-class PostLikeView(APIView):
+class PostLikeCreateDeleteView(APIView):
 
     def post(self, request, pk):
         try:
@@ -85,3 +87,14 @@ class PostLikeView(APIView):
             return Response({"succee": True})
         except Post.DoesNotExist:
             return Response({"msg": "error"})
+
+
+class CommentCreateView(ListCreateAPIView):
+    queryset = PostComment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+    ]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)

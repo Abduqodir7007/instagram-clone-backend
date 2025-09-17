@@ -46,7 +46,7 @@ class PostSerilalizer(serializers.ModelSerializer):
         return False
 
 
-class PostCommentViewSerializer(serializers.Serializer):
+class PostCommentCreateSerializer(serializers.Serializer):
     comment = serializers.CharField()
 
     def create(self, validated_data):
@@ -57,10 +57,49 @@ class PostCommentListSerializer(serializers.Serializer):
     author = UserSerializer(read_only=True)
     comment = serializers.CharField()
     created_at = serializers.DateTimeField()
+    parent = serializers.IntegerField(required=False, allow_null=True)
+    # replies = serializers.SerializerMethodField('get_replies')
+
+    # def get_replies(self, obj):
+    #     if obj.child.exists():
+    #         serializer = self.__class__(obj.child.all(), many=True, context=self.context)
 
 
-# class PostCommentListSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
 
-#     class Meta:
-#         model = PostComment
-#         fields = "__all__"
+    likes = serializers.SerializerMethodField("get_like_counts")
+    replies = serializers.SerializerMethodField("get_replies")
+    liked = serializers.SerializerMethodField("me_liked")
+    author = UserSerializer(read_only=True)
+
+    class Meta:
+        model = PostComment
+        fields = [
+            "comment",
+            "post",
+            "author",
+            "created_at",
+            "likes",
+            "replies",
+            "liked",
+        ]
+
+    def get_like_counts(self, obj):
+        return obj.likes.count()
+
+    def me_liked(self, obj):
+        request = self.context.get("request", None)
+        if request and request.user.is_authenticated:
+            try:
+                if CommentLike.objects.get(comment=obj, author=request.user):
+                    return True
+            except CommentLike.DoesNotExist:
+                return False
+
+    def get_replies(self, obj):
+        if obj.child.exists():
+            serializer = self.__class__(
+                obj.child.all(), many=True, context=self.context
+            )
+            return serializer.data
+        return None

@@ -8,5 +8,18 @@ services:
             - "8000:8000"
         volumes:
             - .:/app
+        depends_on:
+            - db
         env_file:
             - .env
+    db:
+        image: postgres:latest
+        container_name: database
+        env_file:
+            - .env
+        volumes:
+            - postgresql_data:/var/lib/postgresql/data
+
+
+volumes:
+    postgresql_data:
