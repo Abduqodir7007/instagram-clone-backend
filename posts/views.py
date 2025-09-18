@@ -1,7 +1,12 @@
-from .models import *
+from posts.models import Post, PostLike, PostComment, CommentLike
 from posts.permissions import IsOwner
 from posts.custom_pagination import CustomPagination
-from .serializers import *
+from posts.serializers import (
+    CommentSerializer,
+    PostCommentCreateSerializer,
+    PostCommentListSerializer,
+    PostSerilalizer,
+)
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.utils import IntegrityError
@@ -10,7 +15,7 @@ from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
-    ListCreateAPIView
+    ListCreateAPIView,
 )
 
 
@@ -89,6 +94,10 @@ class PostLikeCreateDeleteView(APIView):
             return Response({"msg": "error"})
 
 
+class PostLikes(APIView):
+    pass
+
+
 class CommentCreateView(ListCreateAPIView):
     queryset = PostComment.objects.all()
     serializer_class = CommentSerializer
@@ -98,3 +107,27 @@ class CommentCreateView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+    def get_queryset(self):
+        data = self.request.data  # type: ignore
+        post_id = data.get("post_id")
+
+        return PostComment.objects.filter(post_id=post_id)
+
+
+class CommentLikeView(APIView):
+    def post(self, request, pk):
+        try:
+            comment = PostComment.objects.get(id=pk)
+            user = request.user
+
+            comment_like = CommentLike.objects.get(author=user, comment=comment)
+            comment_like.delete()
+            data = {"success": True, "msg": "You disliked the comment"}
+            return Response(data)
+        except CommentLike.DoesNotExist:
+            comment = PostComment.objects.get(id=pk)
+            user = request.user
+            CommentLike.objects.create(author=user, comment=comment)
+            data = {"success": True, "msg": "You likes the comment"}
+            return Response(data)

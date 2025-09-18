@@ -14,7 +14,7 @@ class Post(BaseModel):
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
 
     def __str__(self) -> str:
-        return f"{self.author.username}'s post"
+        return f"{self.author.username}'s post about {self.caption}"
 
     class Meta:
         ordering = ["-id"]
