@@ -1,9 +1,14 @@
 from django.contrib import admin
 from .models import *
+from mptt.admin import MPTTModelAdmin
 
-
-class PostCommentAdmin(admin.ModelAdmin):
+class PostCommentAdmin(MPTTModelAdmin):
     list_display = ("id", "post")
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'parent':
+            kwargs['queryset'] = PostComment.objects.filter(parent=None)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class PostAdmin(admin.ModelAdmin):

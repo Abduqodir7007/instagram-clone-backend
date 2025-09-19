@@ -103,3 +103,11 @@ class CommentSerializer(serializers.ModelSerializer):
             )
             return serializer.data
         return None
+    
+class CommentCreateSerializer(serializers.Serializer):
+    comment = serializers.CharField()
+    post_id = serializers.UUIDField()
+    comment_id= serializers.UUIDField()
+    
+    def create(self, validated_data):
+        return PostComment.objects.create(**validated_data)

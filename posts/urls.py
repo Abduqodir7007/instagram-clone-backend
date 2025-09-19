@@ -9,7 +9,8 @@ urlpatterns = [
     path("<uuid:pk>/comment/create/", PostCommentCreateView.as_view()),
     path("<uuid:pk>/likes/", PostLikes.as_view()),
     
-    path("comments/", CommentCreateView.as_view()), # this endpoint should create comment for comment
+    path("comments/", CommentListView.as_view()), # this endpoint should create comment for comment
+    path("comment/create/", CommentCreateView.as_view()),
     path("<uuid:pk>/create-delete-like/", PostLikeCreateDeleteView.as_view()),
     path("comment/<uuid:pk>/create-delete-like/", CommentLikeView.as_view()),
 ]

@@ -6,6 +6,7 @@ from posts.serializers import (
     PostCommentCreateSerializer,
     PostCommentListSerializer,
     PostSerilalizer,
+    CommentCreateSerializer
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -98,21 +99,40 @@ class PostLikes(APIView):
     pass
 
 
-class CommentCreateView(ListCreateAPIView):
+class CommentListView(ListAPIView):
     queryset = PostComment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
     ]
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
     def get_queryset(self):
         data = self.request.data  # type: ignore
         post_id = data.get("post_id")
 
         return PostComment.objects.filter(post_id=post_id)
+
+
+class CommentCreateView(CreateAPIView):
+    
+    serializer_class = CommentCreateSerializer
+    queryset = PostComment.objects.all()
+    
+    def perform_create(self, serializer):
+
+        data = self.request.data  # type: ignore
+        
+       
+        user = self.request.user
+       
+        comment = PostComment.objects.get(id=data.get('comment_id'))
+        post = Post.objects.get(id=data.get("post_id"))
+        return PostComment.objects.create(
+            author=user,
+            post=post,
+            parent=comment,
+            comment=data.get("comment"),
+        )
 
 
 class CommentLikeView(APIView):
