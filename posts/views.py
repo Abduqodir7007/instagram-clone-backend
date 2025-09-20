@@ -6,17 +6,19 @@ from posts.serializers import (
     PostCommentCreateSerializer,
     PostCommentListSerializer,
     PostSerilalizer,
-    CommentCreateSerializer
+    CommentCreateSerializer,
+    PostLikeSerializer, 
+    CommentLikeSerializer
 )
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.utils import IntegrityError
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
-    ListCreateAPIView,
+    
 )
 
 
@@ -95,8 +97,13 @@ class PostLikeCreateDeleteView(APIView):
             return Response({"msg": "error"})
 
 
-class PostLikes(APIView):
-    pass
+class PostLikesView(ListAPIView):
+    serializer_class = PostLikeSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        pk = self.kwargs.get("pk")
+        return PostLike.objects.filter(post_id=pk)
 
 
 class CommentListView(ListAPIView):
@@ -114,18 +121,17 @@ class CommentListView(ListAPIView):
 
 
 class CommentCreateView(CreateAPIView):
-    
+
     serializer_class = CommentCreateSerializer
     queryset = PostComment.objects.all()
-    
+
     def perform_create(self, serializer):
 
         data = self.request.data  # type: ignore
-        
-       
+
         user = self.request.user
-       
-        comment = PostComment.objects.get(id=data.get('comment_id'))
+
+        comment = PostComment.objects.get(id=data.get("comment_id"))
         post = Post.objects.get(id=data.get("post_id"))
         return PostComment.objects.create(
             author=user,
@@ -151,3 +157,10 @@ class CommentLikeView(APIView):
             CommentLike.objects.create(author=user, comment=comment)
             data = {"success": True, "msg": "You likes the comment"}
             return Response(data)
+
+class CommentLikeListView(ListAPIView):
+    serializer_class = CommentLikeSerializer
+    
+    def get_queryset(self):
+        pk = self.kwargs.get('pk')
+        return CommentLike.objects.filter(comment_id=pk)

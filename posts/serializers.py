@@ -46,6 +46,12 @@ class PostSerilalizer(serializers.ModelSerializer):
         return False
 
 
+class PostLikeSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    author = UserSerializer(read_only=True)
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
+
+
 class PostCommentCreateSerializer(serializers.Serializer):
     comment = serializers.CharField()
 
@@ -58,11 +64,6 @@ class PostCommentListSerializer(serializers.Serializer):
     comment = serializers.CharField()
     created_at = serializers.DateTimeField()
     parent = serializers.IntegerField(required=False, allow_null=True)
-    # replies = serializers.SerializerMethodField('get_replies')
-
-    # def get_replies(self, obj):
-    #     if obj.child.exists():
-    #         serializer = self.__class__(obj.child.all(), many=True, context=self.context)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -103,11 +104,18 @@ class CommentSerializer(serializers.ModelSerializer):
             )
             return serializer.data
         return None
-    
+
+
 class CommentCreateSerializer(serializers.Serializer):
     comment = serializers.CharField()
     post_id = serializers.UUIDField()
-    comment_id= serializers.UUIDField()
-    
+    comment_id = serializers.UUIDField()
+
     def create(self, validated_data):
         return PostComment.objects.create(**validated_data)
+
+
+class CommentLikeSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
+    author = UserSerializer(read_only=True)
+    comment = serializers.PrimaryKeyRelatedField(read_only=True)
